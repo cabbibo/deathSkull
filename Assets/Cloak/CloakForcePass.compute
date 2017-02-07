@@ -1,0 +1,292 @@
+﻿#pragma kernel CSMain
+ 
+#define threadX 4
+#define threadY 4
+#define threadZ 4
+
+#define strideX 4
+#define strideY 4
+#define strideZ 4
+
+#define gridX (threadX * strideX)
+#define gridY (threadY * strideY)
+#define gridZ (threadZ * strideZ)
+
+
+
+int _Reset;
+float _DeltaTime;
+float _Time;
+
+float3 _Hand1;
+float3 _Hand2;
+
+int _NumShapes;
+
+float _Gravity;
+float _AttractToHand;
+float _RepelFromHand;
+
+float4 _ChestPosition;
+
+
+
+struct Vert{
+  float3 pos;
+  float3 oPos;
+  float3 ogPos;
+  float3 norm;
+  float2 uv;
+  float life;
+  float ids[8];
+  float3 debug;
+};
+
+
+struct Head{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 debug;
+
+};
+
+struct Hand{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 vel;
+  float trigger;
+  float3 debug;
+
+};
+
+
+struct Human{
+
+  Head head;
+  Hand hand1;
+  Hand hand2;
+
+};
+
+
+int _NumberHumans;
+
+
+RWStructuredBuffer<Human> humanBuffer;
+
+//float4x4 _TransformMatrix;
+
+RWStructuredBuffer<float4x4> transformBuffer;
+RWStructuredBuffer<Vert> vertBuffer;
+//RWStructuredBuffer<Shape> shapeBuffer;
+
+#include "Chunks/noise.cginc"
+
+
+
+
+// From https://www.shadertoy.com/view/XtjSRm
+// shane code
+float vNoise( in float3 p )
+{
+    float3 i = floor(p + dot(p, float3(0.333333,0.333333,0.333333)) ); 
+    p -= i - dot(i, float3(0.166666,0.166666,0.166666)) ;
+    float3 i1 = step(0., p-p.yzx), i2 = max(i1, 1.0-i1.zxy); i1 = min(i1, 1.0-i1.zxy); 
+    float3 p1 = p - i1 + 0.166666, p2 = p - i2 + 0.333333, p3 = p - 0.5;
+    float3 rnd = float3(7, 157, 113); 
+    float4 v = max(0.5 - float4(dot(p, p), dot(p1, p1), dot(p2, p2), dot(p3, p3)), 0.);
+    float4 d = float4( dot(i, rnd), dot(i + i1, rnd), dot(i + i2, rnd), dot(i + 1., rnd) ); 
+    d = frac(sin(d)*262144.)*v*2.; 
+    v.x = max(d.x, d.y), v.y = max(d.z, d.w); 
+    return max(v.x, v.y); 
+}
+
+
+float3 getVel( float3 p1 , float3 p2 ){
+
+  float3 v = p1 - p2;
+
+  if( length( v )> .5){ v = normalize( v ) *.5; }
+  return v;
+}
+
+
+[numthreads(threadX,threadY,threadZ)]
+void CSMain (uint3 id : SV_DispatchThreadID) {
+  
+  int pID = id.x + id.y * gridX + id.z * gridX * gridY;
+
+  Vert vert = vertBuffer[ pID ];
+
+
+  if( _Reset == 1 ){
+    vert.oPos = vert.ogPos + _ChestPosition;
+    vert.pos = vert.ogPos + _ChestPosition; 
+  }else{
+
+  // Inertia: objects in motion stay in motion.
+    float3 vel = getVel( vert.pos , vert.oPos);
+
+
+    // floor
+    //if( vert.pos.y < -.2 ){ vert.pos.y = -.2; }
+
+    // GRAVITY
+
+    float3 nPos = vert.pos * 4;
+    float n = noise( nPos * 10 );
+    float n2 = noise( nPos * 5 + float3( 0 , _Time , 0 ) );
+    float n3 = noise( nPos * 7 + float3( 0 , _Time , 0 ));
+    float g = -.0013;
+
+    g = -.3 * _Gravity * (n + .4);
+
+    float3 force = float3( 0 , g , 0 );
+
+
+    for( int i = 0; i < _NumberHumans; i++){
+
+      Human h = humanBuffer[i];
+
+
+      float3 head = h.head.pos;
+      float3 hand1 = h.hand1.pos;
+      float3 hand2 = h.hand2.pos;
+      float3 dif;
+      
+
+      float3 humanForce = float3(0,0,0);
+      
+      dif = hand1 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= 10 * normalize( dif ) * _RepelFromHand;
+      }
+      
+      dif = hand2 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= 10 *normalize( dif )* _RepelFromHand;
+
+      }
+
+      force += humanForce;
+
+    }
+
+
+  //force *= .5;
+
+    //if( vert.life > 1 ){ 
+    //  // wind noise
+    //  force += float3( n2 -.5, 0 , n3-.5 ) * 1; 
+  //
+    //  if( vert.pos.y > -.01 ){ force += float3( 0 , -3 , 0 );}
+  //
+  //
+    //}
+
+    //force += .00000001 * n * normalize(float3( vert.pos.x , 0 , vert.pos.z ));
+    float mass = 1;
+    float3 acceleration= float3( 0 ,0,0); 
+
+
+    float l1 = vertBuffer[vert.ids[0]].life;
+    float l2 = vertBuffer[vert.ids[2]].life;
+    float l3 = vertBuffer[vert.ids[4]].life;
+    float l4 = vertBuffer[vert.ids[6]].life;
+    float l5 = vertBuffer[vert.ids[1]].life;
+    float l6 = vertBuffer[vert.ids[3]].life;
+    float l7 = vertBuffer[vert.ids[5]].life;
+    float l8 = vertBuffer[vert.ids[7]].life;
+    vert.life =400.* ((l1 + l2 + l3 + l4 + l5 + l6 + l7 + l8) / 8);
+
+    vert.life = min( 2 , vert.life );
+
+
+
+      float f = 100;
+
+
+
+      if( vert.debug.x == 1 ){
+
+        force -= 100 * (vert.pos - ( vert.ogPos + _ChestPosition)) * ( 1- _AttractToHand);
+
+      }else{
+
+        force += .04 * normalize( vert.ogPos) / length( vert.ogPos);// (vert.pos -  _ChestPosition);
+
+
+      }
+
+      if( vert.uv.x < .1 && abs( vert.uv.y -.5)  > .4 ){
+        force -= (vert.pos - _Hand1)*40 * _AttractToHand;
+      }
+
+      if( vert.uv.x > .9 &&  abs( vert.uv.y -.5)  > .4 ){
+        force -= (vert.pos - _Hand2) * 40 * _AttractToHand;
+      }
+
+      if( length( vert.uv - float2(.5,.5)) < .1 ){
+        force -= 1000 * (vert.pos - ( vert.ogPos + _ChestPosition));
+        //  force -= ( vert.pos - _ChestPosition ) * 100 * _AttractToHand;
+      }
+
+      if( vert.pos.y <= 0 ){
+        vert.pos = vert.pos; 
+        vert.oPos = vert.pos;
+      }
+
+
+
+      /*else{
+      //f = length( vert.pos - float3( 0 , 0 , 0 )) -.5;
+
+      //f =  min(f , length( vert.pos - _ChestPosition ) -.3 );
+      //if( f < 0 ){
+//
+      //  //if( length(vert.uv - float2( .5 , .5 )) < .01 ){
+      //  // vert.life += 1;
+      //  //}
+//
+//
+      //  vert.debug.z = 4;
+      //  vert.pos = vert.oPos; //float3( 0 , -f , 0 );
+      //  vert.oPos = vert.pos;
+      //  //vert.pos += normalize(vel) * f * .5;
+      //  //vert.oPos = vert.pos;
+      //}else{
+      //  vert.debug.z = 0;
+      //}
+    }*/
+
+      
+
+    //  if( f < 0.01 ){ vert.debug.z = 4; }
+
+    
+
+
+  // Inertia: objects in motion stay in motion.
+    vel = getVel( vert.pos , vert.oPos);
+
+    
+    acceleration = force;
+
+    float dampening = .99;// - vert.life * .01;
+    float3 next = vert.pos + vel * dampening + acceleration * _DeltaTime * _DeltaTime;
+
+    vert.oPos = vert.pos;
+    vert.pos = next;
+
+  }
+
+
+  vertBuffer[pID] = vert;
+
+
+  
+}

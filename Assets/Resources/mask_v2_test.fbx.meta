@@ -1,0 +1,117 @@
+fileFormatVersion: 2
+guid: d36335ce033e75f41be30b61ab4a0bde
+timeCreated: 1485210888
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: CINEMA_4D_Editor
+    100002: horn_hair_emit_LEFT
+    100004: horn_hair_emit_RIGHT
+    100006: horn_hollow_main_LEFT
+    100008: horn_hollow_main_RIGHT
+    100010: human_face
+    100012: mask
+    100014: //RootNode
+    100016: neck
+    100018: Null
+    400000: CINEMA_4D_Editor
+    400002: horn_hair_emit_LEFT
+    400004: horn_hair_emit_RIGHT
+    400006: horn_hollow_main_LEFT
+    400008: horn_hollow_main_RIGHT
+    400010: human_face
+    400012: mask
+    400014: //RootNode
+    400016: neck
+    400018: Null
+    2300000: horn_hair_emit_LEFT
+    2300002: horn_hair_emit_RIGHT
+    2300004: horn_hollow_main_LEFT
+    2300006: horn_hollow_main_RIGHT
+    2300008: human_face
+    2300010: mask
+    2300012: neck
+    3300000: horn_hair_emit_LEFT
+    3300002: horn_hair_emit_RIGHT
+    3300004: horn_hollow_main_LEFT
+    3300006: horn_hollow_main_RIGHT
+    3300008: human_face
+    3300010: mask
+    3300012: neck
+    4300000: horn_hair_emit_LEFT
+    4300002: horn_hollow_main_LEFT
+    4300004: horn_hair_emit_RIGHT
+    4300006: horn_hollow_main_RIGHT
+    4300008: neck
+    4300010: human_face
+    4300012: mask
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
