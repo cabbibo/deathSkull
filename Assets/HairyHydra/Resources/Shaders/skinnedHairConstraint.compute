@@ -1,0 +1,95 @@
+﻿#pragma kernel CSMain
+ 
+#define threadX 4
+#define threadY 4
+#define threadZ 4
+
+int _StrideX;
+int _StrideY;
+int _StrideZ;
+
+
+#define gridX (threadX * _StrideX)
+#define gridY (threadY * _StrideY)
+#define gridZ (threadZ * _StrideZ)
+
+int _NumberThreads;
+
+
+int _VertsPerHair;
+float _SpringDistance;
+int _PassID;
+
+struct Vert{
+	float3 pos;
+	float3 oPos;
+	float3 vel;
+	float3 norm;
+	float2 uv;
+	float3 debug;
+	float3 triIDs;
+	float3 triWeights;
+};
+
+RWStructuredBuffer<Vert> vertBuffer;
+[numthreads(threadX,threadY,threadZ)]
+//[numthreads(10,10,10)]
+void CSMain (uint3 id : SV_DispatchThreadID) {
+  
+  	int pID = id.x + id.y * gridX + id.z * gridX * gridY;
+
+	pID =  pID * 2;
+  	pID = pID + _PassID;
+
+
+  	//pID += _PassID;
+  	//pID *= 2;
+
+ 	Vert v1 = vertBuffer[pID];
+
+ 	//v1.debug = float3( 1,1,1);
+ 	if( v1.uv.x >= (float(_VertsPerHair-1)/float(_VertsPerHair))){
+ 		v1.debug = float3( 1 , 1 , 1 );
+ 		vertBuffer[ pID ] = v1;
+
+
+ 	}else{
+ 		Vert v2 = vertBuffer[ pID + 1 ];
+
+ 		float3 dif = v1.pos - v2.pos;
+ 		float l = length( dif );
+
+		float difference = ((_SpringDistance ) - l ) / l;
+
+		float3 translate = dif * .5 * difference;// /  float( _WhichOne + 1)
+		float3 t1 = 1 * translate; // vert.mass;
+		float3 t2 = 1 * translate; // vert2.mass;
+		
+		float3 n1 = v1.pos + t1;
+		float3 n2 = v2.pos - t2;
+		//v1.debug = float3( 0 , 0 , 1 );
+		//v2.debug = float3( 1 , 0 , 1 );
+
+		if( v1.uv.x != 0){
+			v1.pos = n1;
+			v2.pos = n2;
+			//v1.oPos = v1.oPos; + (n1-v1.oPos) * .3;
+			//v2.oPos = v2.oPos; + (n2-v2.oPos) * .3;
+		}else{
+			v1.pos = v1.pos;
+			// If its at the base, move it without moving bottom
+			v2.pos = n2-t2;
+		}
+
+		
+
+
+		vertBuffer[ pID ] = v1;
+		vertBuffer[ pID + 1 ] = v2;
+
+ 	}
+
+
+
+	
+}

@@ -1,0 +1,202 @@
+﻿#pragma kernel CSMain
+ 
+#define threadX 4
+#define threadY 4
+#define threadZ 4
+
+int _StrideX;
+int _StrideY;
+int _StrideZ;
+
+
+#define gridX (threadX * _StrideX)
+#define gridY (threadY * _StrideY)
+#define gridZ (threadZ * _StrideZ)
+
+float _DeltaTime;
+float _Time;
+int _Reset;
+int _NumberHumans;
+
+float _SpringDistance;
+
+struct Hair{
+	float3 pos;
+	float3 oPos;
+	float3 vel;
+	float3 norm;
+	float2 uv;
+	float3 debug;
+	float3 triIDs;
+	float3 triWeights;
+};
+
+struct Base{
+
+  float  used;
+  float3 pos;
+  float3 vel;
+  float3 nor;
+  float2 uv;
+
+  float3 targetPos;
+
+  float3 bindPos;
+  float3 bindNor;
+  float4 boneWeights;
+  float4 boneIDs;
+  float3 debug;
+  
+};
+struct Head{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 debug;
+
+};
+
+struct Hand{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 vel;
+  float trigger;
+  float3 debug;
+
+};
+
+
+struct Human{
+
+  Head head;
+  Hand hand1;
+  Hand hand2;
+
+};
+
+
+
+
+
+RWStructuredBuffer<Hair> hairBuffer;
+RWStructuredBuffer<Base> baseBuffer;
+RWStructuredBuffer<Human> humanBuffer;
+
+float3 getVel( float3 p1 , float3 p2 ){
+
+	float3 v = p1 - p2;
+
+	if( length( v ) > .5){ v = normalize( v ) *.5; }
+	return v;
+}
+
+
+[numthreads(threadX,threadY,threadZ)]
+void CSMain (uint3 id : SV_DispatchThreadID) {
+  
+  int pID = id.x + id.y * gridX + id.z * gridX * gridY;
+
+  Hair vert = hairBuffer[ pID ];
+
+  Base b1 = baseBuffer[(int)vert.triIDs.x];
+  Base b2 = baseBuffer[(int)vert.triIDs.y];
+  Base b3 = baseBuffer[(int)vert.triIDs.z];
+
+
+  float3 basePos = b1.pos * vert.triWeights.x + b2.pos * vert.triWeights.y + b3.pos * vert.triWeights.z;
+  float3 baseNor = b1.nor * vert.triWeights.x + b2.nor * vert.triWeights.y + b3.nor * vert.triWeights.z;
+
+
+
+
+
+  if( _Reset == 1 ){
+    vert.oPos = basePos + baseNor * _SpringDistance * vert.uv.x;// vert.ogPos;
+    vert.pos = basePos + baseNor * _SpringDistance * vert.uv.x;//vert.ogPos;
+  }else{
+
+
+		//float3 tNorm = mul( transformMatrix[0] , float4( vert.norm , 0)).xyz;
+  	float g = 10.3;
+
+
+  	float3 force = baseNor * g * (1-vert.uv.x )*(1-vert.uv.x );//float3( 0 , g , 0 );
+
+  	if( vert.uv.x == 0 ){ 
+  		//float3 tPos = mul( transformMatrix[0] , float4( vert.ogPos , 1)).xyz; 
+  		vert.pos = basePos; 
+  		vert.oPos = basePos;
+  	}
+
+
+    for( int i = 0; i < _NumberHumans; i++){
+
+      Human h = humanBuffer[i];
+
+
+      float3 head = h.head.pos;
+      float3 hand1 = h.hand1.pos;
+      float3 hand2 = h.hand2.pos;
+      float3 dif;
+
+      float3 humanForce = float3(0,0,0);
+      
+     /* dif = vert.pos - hand1;
+      if( length( dif )<.2){
+        vert.pos = hand1 - normalize( dif)* .1;
+        vert.oPos = vert.pos;
+      }
+
+      dif = vert.pos - hand2; 
+      if( length( dif )<.2){
+        vert.pos = hand2 - normalize( dif)* .1;
+        vert.oPos = vert.pos;
+      }*/
+
+       dif = hand1 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= .01 * normalize( dif );
+      }
+      
+      dif = hand2 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= .01 *normalize( dif );
+
+      }
+
+      force += humanForce;
+      
+    }
+
+
+  	//force += 5 * normalize( -dif )/length( dif);
+
+  // Inertia: objects in motion stay in motion.
+  	float3 vel = getVel( vert.pos , vert.oPos);
+
+  	float3 acceleration = force;
+
+    float dampening = .85;//.99999;// - vert.life * .01;
+  	float3 next = vert.pos + vel * dampening + acceleration * _DeltaTime * _DeltaTime;
+
+  	vert.oPos = vert.pos;
+  	vert.pos = next;
+  	vert.vel = vel;
+
+  	if( vert.uv.x == 0 ){ 
+  		//float3 tPos = mul( transformMatrix[0] , float4( vert.ogPos , 1)).xyz; 
+  		vert.pos = basePos; 
+  		vert.oPos = basePos;
+  	}
+
+  	
+
+  }
+
+
+	hairBuffer[pID] = vert;
+	
+}

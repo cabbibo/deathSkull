@@ -1,0 +1,198 @@
+﻿#pragma kernel CSMain
+ 
+#define threadX 6
+#define threadY 6
+#define threadZ 6
+
+#define strideX 6
+#define strideY 6
+#define strideZ 6
+
+#define gridX (threadX * strideX)
+#define gridY (threadY * strideY)
+#define gridZ (threadZ * strideZ)
+
+ 
+struct Vert{
+
+  float  used;
+  float3 pos;
+  float3 vel;
+  float3 nor;
+  float2 uv;
+
+  float3 targetPos;
+
+  float3 bindPos;
+  float3 bindNor;
+  float4 boneWeights;
+  float4 boneIDs;
+  float3 debug;
+  
+};
+
+struct Bone{
+	float4x4 transform;
+	float4x4 bindPose;
+};
+
+struct Head{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 debug;
+
+};
+
+struct Hand{
+
+  float4x4 localToWorld;
+  float4x4 worldToLocal;
+  float3 pos;
+  float3 vel;
+  float trigger;
+  float3 debug;
+
+};
+
+
+struct Human{
+
+  Head head;
+  Hand hand1;
+  Hand hand2;
+
+};
+
+
+int Set;
+int _NumberHumans;
+
+float3 springForce( float3 p1 , float3 p2 , float d ){
+
+  float3 dir = p1 - p2;
+
+  float l = length( dir );
+
+  if( l > 0 ){
+    dir = normalize( dir );
+  }else{
+    
+  }
+
+  float dif = abs(l - d);
+
+  return dif *   float(sign(dif)) * -dir;
+
+}
+
+
+
+RWStructuredBuffer<Vert> vertBuffer;
+RWStructuredBuffer<Bone> boneBuffer;
+RWStructuredBuffer<Human> humanBuffer;
+
+[numthreads(threadX,threadY,threadZ)]
+void CSMain (uint3 id : SV_DispatchThreadID) {
+  
+  int pID = id.x + id.y * gridX + id.z * gridX * gridY;
+
+  Vert vert = vertBuffer[pID];
+
+  Bone b0 = boneBuffer[ int( vert.boneIDs[0])];
+  Bone b1 = boneBuffer[ int( vert.boneIDs[1])];
+  Bone b2 = boneBuffer[ int( vert.boneIDs[2])];
+  Bone b3 = boneBuffer[ int( vert.boneIDs[3])];
+
+  //float3 p0 =  mul(  b0.bindPose,float4( vert.bindPos , 1 ) ).xyz;
+  float3 p0 = mul( mul(b0.transform,b0.bindPose), float4( vert.bindPos , 1 ) ).xyz;
+  float3 p1 = mul( mul(b1.transform,b1.bindPose), float4( vert.bindPos , 1 ) ).xyz;
+  float3 p2 = mul( mul(b2.transform,b2.bindPose), float4( vert.bindPos , 1 ) ).xyz;
+  float3 p3 = mul( mul(b3.transform,b3.bindPose), float4( vert.bindPos , 1 ) ).xyz;
+
+  float3 n0 = mul( mul(b0.transform,b0.bindPose), float4( vert.bindNor , 0 ) ).xyz;
+  float3 n1 = mul( mul(b1.transform,b1.bindPose), float4( vert.bindNor , 0 ) ).xyz;
+  float3 n2 = mul( mul(b2.transform,b2.bindPose), float4( vert.bindNor , 0 ) ).xyz;
+  float3 n3 = mul( mul(b3.transform,b3.bindPose), float4( vert.bindNor , 0 ) ).xyz;
+ 
+
+  float3 fPos  = p0 * vert.boneWeights[0];
+  			 fPos += p1 * vert.boneWeights[1];
+  			 fPos += p2 * vert.boneWeights[2];
+  			 fPos += p3 * vert.boneWeights[3];
+
+
+ 	float3 fNor  = n0 * vert.boneWeights[0];
+  			 fNor += n1 * vert.boneWeights[1];
+  			 fNor += n2 * vert.boneWeights[2];
+  			 fNor += n3 * vert.boneWeights[3];
+
+
+  
+
+
+  vert.targetPos = fPos;
+
+  if( Set == 0 ){
+
+	  float3 force = float3( 0 , 0 , 0 );
+
+	  force += .3 * springForce( vert.pos , vert.targetPos , .0 );
+
+    for( int i = 0; i < _NumberHumans; i++){
+
+      Human h = humanBuffer[i];
+
+
+      float3 head = h.head.pos;
+      float3 hand1 = h.hand1.pos;
+      float3 hand2 = h.hand2.pos;
+      float3 dif;
+      
+
+      float3 humanForce = float3(0,0,0);
+      
+      dif = hand1 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= .01 * normalize( dif );
+      }
+      
+      dif = hand2 - vert.pos;
+      if( length( dif )<.2){
+        humanForce -= .01 *normalize( dif );
+
+      }
+
+      force += humanForce;
+
+    }
+
+
+
+
+
+	  vert.vel += force * 1.;
+	  vert.pos += vert.vel;
+	  vert.vel *= .4;
+
+	}else{
+
+		vert.pos = vert.targetPos * .9;
+		vert.vel = 0;
+	}
+
+  //vert.pos = vert.targetPos;
+
+
+
+  //float3 fPos = p0;
+
+ 	//vert.pos = fPos;
+ 	vert.nor = normalize(fNor);
+
+ 	vert.debug = float3( sin(vert.bindPos.x * 100) , .3 , .3 );//float3( vert.boneWeights[0] , vert.boneWeights[1], vert.boneWeights[2] );
+
+  vertBuffer[pID] = vert;
+
+}
