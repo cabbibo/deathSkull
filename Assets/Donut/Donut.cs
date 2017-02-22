@@ -25,9 +25,9 @@ public class Donut : MonoBehaviour {
     private float[] inValues;
 
 
-    private ComputeBuffer _vertBuffer;
-    private ComputeBuffer _ogBuffer;
-    private ComputeBuffer _transBuffer;
+    public ComputeBuffer _vertBuffer;
+    public ComputeBuffer _ogBuffer;
+    public ComputeBuffer _transBuffer;
 
 
     private const int threadX = 8;
@@ -42,11 +42,11 @@ public class Donut : MonoBehaviour {
     private int gridY { get { return threadY * strideY; } }
     private int gridZ { get { return threadZ * strideZ; } }
 
-    private int vertexCount { get { return gridX * gridY * gridZ; } }
+    public int vertexCount { get { return gridX * gridY * gridZ; } }
 
 
-    private int ribbonWidth = 1024;
-    private int ribbonLength { get { return (int)Mathf.Floor( (float)vertexCount / ribbonWidth ); } }
+    public int ribbonWidth = 1024;
+    public int ribbonLength { get { return (int)Mathf.Floor( (float)vertexCount / ribbonWidth ); } }
     
 
     private int _kernel;

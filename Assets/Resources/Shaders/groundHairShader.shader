@@ -122,8 +122,10 @@
                 float3 col = float3(1., 0,0) * nNor.x + float3( 1., .4 , .2 ) * nNor.y  + float3( 1. , .8,.5) * nNor.z;////-dot( normalize(v.eye) , reflect( normalize(v.eye), v.nor));// * lerp( float3(1,.5 , .3), float3( 0, .8,.4),  noise( v.worldPos * 100));// v.nor * .5 + .5;
                 
                 float4 aCol = tex2D( _AudioMap , float2((v.uv.x + v.uv.y) * .2 , 0.));
-                col = (aCol.xyz+ .04) * 10. * cubeCol * hsv(v.uv.x + v.uv.y,.6,1) * 2; //normalize(refl + normalize(v.vel))* .5 + .5;
+                col = (aCol.xyz+ .04) * 10. * cubeCol * hsv(v.uv.x + v.uv.y,.2,1) * 2; //normalize(refl + normalize(v.vel))* .5 + .5;
                 col *= v.uv.x;
+
+                col = lerp( col * float3( 3 , 2, .6 ) , col * float3( 2, .4 , 1) , v.uv.x);
                 //col = lerp( length( col) * .3, col , _LevelEnded);
                // col = v.debug;
                 return float4( col , 1 );

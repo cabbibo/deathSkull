@@ -150,7 +150,7 @@ void CSMain (uint3 id : SV_DispatchThreadID) {
       dif = head - vert.pos;
 
       if( length( dif )<1){
-        humanForce -= .4 * normalize( dif );
+        //humanForce -= .4 * normalize( dif );
 
       }
 

@@ -106,10 +106,12 @@ Shader "Custom/Island" {
 
         float4 aCol = tex2D( _AudioMap , float2(v.ro.z *100 , 0.));
     		
-    		col= cubeCol * ( v.normal * .5 + .5 );
-        col *= clamp( (v.ro.z-.0000) * 500 , 0 , 1 );
+    		col= cubeCol;// * ( v.normal * .5 + .5 );
+        //col *= clamp( (v.ro.z-.0000) * 500 , 0 , 1 );
 
         col *= ( aCol.xyz * aCol.xyz ) * 3. + .2;
+
+        col *= float3( .4 , .6 , 3 );
 
     	
             fixed4 color;

@@ -3,7 +3,9 @@ using System.Collections;
 using Normal.Realtime;
 
 public class Sinew: MonoBehaviour {
+	
 
+	public bool render;
 	public GameObject endPos;
 	public ComputeShader collisionShader;
 	public ComputeShader constraintShader;
@@ -11,7 +13,9 @@ public class Sinew: MonoBehaviour {
   	public AudioListenerTexture audioTexture;
 
 	
-	public Material material;
+	public Material inMat;
+
+	private Material material;
 
 	public int SIZE = 8;
 
@@ -97,6 +101,8 @@ public class Sinew: MonoBehaviour {
 
 	    Camera.onPostRender += Render;
 
+	    material = new Material( inMat );
+
 	    CreateBuffers();
 
 	    Dispatch( 1 );
@@ -109,6 +115,7 @@ public class Sinew: MonoBehaviour {
     Camera.onPostRender -= Render;
     _vertBuffer.Release(); 
     _transformBuffer.Release(); 
+    GameObject.DestroyImmediate( material );
   }
 
 
@@ -268,6 +275,7 @@ public class Sinew: MonoBehaviour {
 	
 	void Render( Camera c ){
 
+		if( render == true ){
 		material.SetPass(0);
 
 		material.SetInt( "_VertsPerHair" , numVertsPerHair );
@@ -276,7 +284,7 @@ public class Sinew: MonoBehaviour {
 		material.SetTexture("_AudioMap" , audioTexture.AudioTexture);
     	
     	Graphics.DrawProcedural(MeshTopology.Lines, totalHairs * (numVertsPerHair-1) * 2 );
-
+    	}
 	}
 
 	void updateTransformBuffer(){

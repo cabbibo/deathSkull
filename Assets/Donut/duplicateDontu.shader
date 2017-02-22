@@ -1,4 +1,5 @@
-Shader "Custom/donut" {
+﻿Shader "Custom/duplicateDontu" {
+
 
 
     Properties {
@@ -124,13 +125,13 @@ Shader "Custom/donut" {
                 VertC4 v = buf_Points[fID];
                 Pos og = og_Points[fID];
 
-                float3 dif =  mul( worldMat , float4( og.pos , 1.) ).xyz - v.pos;
+                float3 pos =  mul( worldMat , float4( v.pos , 1.) ).xyz - v.pos;
 
-                o.worldPos = v.pos;
+                o.worldPos = pos;
 
                 o.pos = mul (UNITY_MATRIX_VP, float4(o.worldPos,1.0f));
 
-                float3 fDif = normalize( dif ) * 1.;
+                float3 fDif = normalize( o.worldPos );//normalize( dif ) * 1.;
                 float3 fNor = v.nor * 1.;
                 float3 fVel = normalize( v.vel) * 1.;
 
