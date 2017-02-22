@@ -1,9 +1,9 @@
 ﻿
 #pragma kernel CSMain
  
-#define threadX 4
-#define threadY 4
-#define threadZ 4
+#define threadX 8
+#define threadY 8
+#define threadZ 8
 
 int _StrideX;
 int _StrideY;

@@ -7,7 +7,8 @@ public class Sinew: MonoBehaviour {
 	public GameObject endPos;
 	public ComputeShader collisionShader;
 	public ComputeShader constraintShader;
-  public GameObject HumanBuffer;
+  	public GameObject HumanBuffer;
+  	public AudioListenerTexture audioTexture;
 
 	
 	public Material material;
@@ -55,8 +56,8 @@ public class Sinew: MonoBehaviour {
 
 	public ComputeBuffer _vertBuffer;
 	public ComputeBuffer _transformBuffer;
-	public float[] vertValues;
-	public float[] transformValues;
+	private float[] vertValues;
+	private float[] transformValues;
 
 
 	// Information About mesh
@@ -272,6 +273,7 @@ public class Sinew: MonoBehaviour {
 		material.SetInt( "_VertsPerHair" , numVertsPerHair );
 		material.SetVector("_EndPos", endPos.transform.position );
 		material.SetBuffer("_vertBuffer", _vertBuffer );
+		material.SetTexture("_AudioMap" , audioTexture.AudioTexture);
     	
     	Graphics.DrawProcedural(MeshTopology.Lines, totalHairs * (numVertsPerHair-1) * 2 );
 
@@ -298,8 +300,8 @@ public class Sinew: MonoBehaviour {
 		collisionShader.SetInt( "_Reset" , reset );
 		collisionShader.SetFloat( "_DeltaTime" , Time.deltaTime );
 		collisionShader.SetFloat( "_Time" , Time.time );
-    collisionShader.SetVector("_EndPos", endPos.transform.position );
-		collisionShader.SetFloat("_PullVal", endPos.GetComponent<Hand>().triggerPosition );
+    	collisionShader.SetVector("_EndPos", endPos.transform.position );
+		//collisionShader.SetFloat("_PullVal", endPos.GetComponent<Hand>().triggerPosition );
     //print(endPos.GetComponent<Hand>().triggerPosition);
 		collisionShader.SetInt( "_VertsPerHair" , numVertsPerHair );
 

@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using System.Collections;
+using Normal.Realtime;
 
 public class HandInfo : MonoBehaviour {
 
@@ -23,7 +24,7 @@ public class HandInfo : MonoBehaviour {
 		hand.worldToLocal = transform.worldToLocalMatrix;
 		hand.vel = velocity;
 		hand.pos = transform.position;
-		hand.trigger = trigger;
+		hand.trigger = GetComponent<Hand>().triggerPosition;
 		hand.debug = debug;
 
 	}
