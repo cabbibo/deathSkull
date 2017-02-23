@@ -36,7 +36,7 @@ namespace Normal.Realtime {
 
         void Awake() {
             // Hide this game object from the editor hierarchy as it's internal to how Normal operates.
-            gameObject.hideFlags = HideFlags.HideInHierarchy;
+            //gameObject.hideFlags = HideFlags.HideInHierarchy;
 
                  _headGameObject =      head.gameObject;
              _leftHandGameObject =  leftHand.gameObject;

@@ -39,11 +39,13 @@ struct Vert{
             uniform int _BladeWidth;
             uniform int _BladeLength;
             uniform int _BladeResolution;
+            uniform int _TotalBlades;
             uniform int _TotalVerts;
 
             uniform sampler2D _MainTex;
             uniform sampler2D _NormalMap;
             uniform sampler2D _TextureMap;
+            uniform sampler2D _AudioMap;
             uniform samplerCUBE _CubeMap;
 
 
@@ -209,9 +211,12 @@ struct Vert{
 								float angle =  col/_BladeWidth * 2 * 3.14159;
               	float angleU = (col+1)/_BladeWidth * 2 * 3.14159;
 
+              	float bladeNormed = float( bladeID)/ float( _TotalBlades);
+              	float3 aCol1 = tex2Dlod( _AudioMap , float4( r1 * .2 + bladeNormed * .2 , 0. ,0. ,0.)).xyz;
+              	float3 aCol2 = tex2Dlod( _AudioMap , float4( r2 * .2 + bladeNormed * .2, 0. ,0. ,0.)).xyz;
 
-              	float radius = .2 * getRadius( r1 );///.04 * pow((1 - r1),.5);
-              	float radiusU = .2 * getRadius( r2 );// .04 * * pow((1 - r2),.5);
+              	float radius = 1.2 * getRadius( r1 ) * clamp( length( aCol1 ) , 0 , .2) + .03;
+              	float radiusU = 1.2 * getRadius( r2 ) * clamp( length( aCol2 ) , 0 , .2) + .03;
 
               	float3 f1 = radius * sin(angle ) * x1   + radius * cos( angle  ) * z1 + pos1;
               	float3 f2 = radius * sin(angleU) * x1   + radius * cos( angleU ) * z1 + pos1;
@@ -229,7 +234,7 @@ struct Vert{
 								float2 uv4 = float2(r2,(col+1)/_BladeWidth);
 
 
-              	float3 finalPos; float3 finalNor; float2 finalUV;
+				float3 finalCol; float3 finalPos; float3 finalNor; float2 finalUV;
 
 
               	//f1 = float3( bladeID , 0 + row , 0 );
@@ -244,27 +249,33 @@ struct Vert{
 
  	             	if( tri == 0){
  	             		finalPos = f1;
+ 	             		finalCol = aCol1;
  	             		finalNor = n1;
  	             		finalUV = uv1;
 
               	}else if( tri == 1 ){
               		finalPos = f2;
+              		finalCol = aCol1;
  	             		finalNor = n2;
  	             		finalUV = uv2;
               	}else if( tri == 2 ){
               		finalPos = f4;
+              		finalCol = aCol2;
  	             		finalNor = n4;
  	             		finalUV = uv4;
               	}else if( tri == 3 ){
               		finalPos = f1;
+              		finalCol = aCol1;
  	             		finalNor = n1;
  	             		finalUV = uv1;
               	}else if( tri == 4 ){
               		finalPos = f4;
+              		finalCol = aCol2;
  	             		finalNor = n4;
  	             		finalUV = uv4;
               	}else if( tri == 5 ){
               		finalPos = f3;
+              		finalCol = aCol2;
  	             		finalNor = n3;
  	             		finalUV = uv3;
               	}else{}
@@ -275,7 +286,7 @@ struct Vert{
 
 				int bladeBase = _BladeLength * int( bladeID );
 				Vert baseVert = vertBuffer[ bladeBase ];
-				o.col = float3( 1,1,1);//tex2Dlod( _MainTex , float4(baseVert.texUV.x , baseVert.texUV.y,0,0)).xyz;
+				o.col =  finalCol;//tex2Dlod( _MainTex , float4(baseVert.texUV.x , baseVert.texUV.y,0,0)).xyz;
               // Vert v = vertBuffer[fID];
               // Vert vUp = vertBuffer[v.upID];
 
@@ -321,7 +332,7 @@ struct Vert{
 
 
 
-            	float3 fCol = lerp( col1 , col2 , v.uv.x); //v.nor * .5 + .5;//float3( v.uv.x , v.uv.y , 0 );
+            	float3 fCol = (v.col * 2.+ .1) * lerp( col1 , col2 , v.uv.x); //v.nor * .5 + .5;//float3( v.uv.x , v.uv.y , 0 );
                 return float4( fCol , 1.);
             }
  

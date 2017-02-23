@@ -71,6 +71,8 @@ public class Sinew: MonoBehaviour {
   	private Vector3[] normals;
   	private Vector2[] uvs;
   	private Vector3[] positions;
+  	private Vector3[] transformedPositions;//positions;
+  	private Vector3[] transformedNormals;
   	private Color[]   colors;
 
   	private Vector3 oPos;
@@ -94,10 +96,14 @@ public class Sinew: MonoBehaviour {
 		mesh = GetComponent<MeshFilter>().mesh;
 	    triangles = mesh.triangles; 
 	    positions = mesh.vertices; 
+	    transformedPositions = mesh.vertices; 
 	    normals   = mesh.normals; 
+	    transformedNormals   = mesh.normals; 
 	    tangents  = mesh.tangents; 
 	    colors    = mesh.colors; 
 	    uvs       = mesh.uv; 
+
+
 
 	    Camera.onPostRender += Render;
 
@@ -153,6 +159,15 @@ public class Sinew: MonoBehaviour {
 		return Random.value;
   }
 
+  void transformPositions(){
+  	for( int i =0; i< positions.Length; i++){
+  		transformedPositions[i] = transform.TransformPoint( positions[i] );
+  		transformedNormals[i] = transform.TransformVector( normals[i] );
+  	}
+  }
+
+
+
 	void CreateBuffers(){
 
 
@@ -195,7 +210,7 @@ public class Sinew: MonoBehaviour {
 
           Vector3 pos = GetRandomPointInTriangle( hairID, positions[ tri0 ] ,positions[ tri1 ]  , positions[ tri2 ]  );
 					
-					float a0 = AreaOfTriangle( pos , positions[tri1] , positions[tri2] );
+				  float a0 = AreaOfTriangle( pos , positions[tri1] , positions[tri2] );
 				  float a1 = AreaOfTriangle( pos , positions[tri0] , positions[tri2] );
 				  float a2 = AreaOfTriangle( pos , positions[tri0] , positions[tri1] );
 				  float aTotal = a0 + a1 + a2;

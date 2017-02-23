@@ -29,10 +29,11 @@ int numVertsTotal;
 		material.SetPass(0);
 		//material.SetInt( "_VertsPerHair" , grass.numVertsPerHair );
 		material.SetBuffer("vertBuffer", grass._vertBuffer );
-		//material.SetTexture("_AudioMap" , grass.audioTexture.AudioTexture);
+		material.SetTexture("_AudioMap" , grass.audioTexture.AudioTexture);
 
 
     	material.SetInt("_TotalVerts" ,grass.fullVertCount);
+    	material.SetInt("_TotalBlades" ,grass.totalHairs);
     	material.SetInt("_BladeWidth" , bladeWidth);
     	material.SetInt("_BladeLength" , grass.numVertsPerHair);
     	material.SetInt("_BladeResolution" ,bladeResolution);
