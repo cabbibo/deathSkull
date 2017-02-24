@@ -4,6 +4,7 @@ Shader "Custom/donut" {
     Properties {
 
         _CubeMap( "Cube Map" , Cube )  = "defaulttexture" {}
+            _NormalMap ("normal", 2D) = "white" {}
 
 
 
@@ -23,6 +24,7 @@ Shader "Custom/donut" {
             #pragma fragment frag
  
             #include "UnityCG.cginc"
+            #include "Chunks/uvNormalMap.cginc"
 
             uniform samplerCUBE _CubeMap;
  
@@ -63,6 +65,7 @@ Shader "Custom/donut" {
             uniform int _TotalVerts;
 
             uniform sampler2D _AudioMap;
+            uniform sampler2D _NormalMap;
  
             //A simple input struct for our pixel shader step containing a position.
             struct varyings {
@@ -70,6 +73,7 @@ Shader "Custom/donut" {
                 float3 worldPos : TEXCOORD1;
                 float3 nor      : TEXCOORD0;
                 float3 eye      : TEXCOORD2;
+                float3 col      : TEXCOORD5;
                 float3 debug    : TEXCOORD3;
                 float2 uv       : TEXCOORD4;
             };
@@ -124,9 +128,11 @@ Shader "Custom/donut" {
                 VertC4 v = buf_Points[fID];
                 Pos og = og_Points[fID];
 
+                float4 aCol = tex2Dlod( _AudioMap , float4( (( v.uv.y * 10 + _Time.x * 1 ) % .3 )  * .2, 0,0,0) );
+
                 float3 dif =  mul( worldMat , float4( og.pos , 1.) ).xyz - v.pos;
 
-                o.worldPos = v.pos;
+                o.worldPos = v.pos + v.nor * pow( length( aCol ),.5 ) * .02;
 
                 o.pos = mul (UNITY_MATRIX_VP, float4(o.worldPos,1.0f));
 
@@ -138,6 +144,7 @@ Shader "Custom/donut" {
 
                 o.eye = _WorldSpaceCameraPos - o.worldPos;
                 o.uv = v.uv;
+                o.col = aCol;
 
                 o.nor = v.nor; 
                 return o;
@@ -147,13 +154,17 @@ Shader "Custom/donut" {
             //Pixel function returns a solid color for each point.
             float4 frag (varyings i) : COLOR {
 
-                float m = dot( i.eye , i.nor );
-                float3 cubeCol = texCUBE(_CubeMap,i.debug).rgb;
+                float3 fNorm = uvNormalMap( _NormalMap , i.pos ,  i.uv  * float2( 2. , 2.2), i.nor , .8 , .6 );
+  
+
+                float m = dot( i.eye , fNorm );
+                float3 refl = reflect( fNorm ,i.eye);
+                float3 cubeCol = texCUBE(_CubeMap,refl).rgb;
                 float3 col = cubeCol;// * (i.debug * .5 + .5);
                 float4 aCol = tex2D( _AudioMap , float2( m , 0) );
                 col = col* .2 + col * 20 * aCol.xyz;
 
-                col *= float3( 2, 1.3 , .4);
+                col *= float3( 2, 1.3 , .4)  *  ( .8 + i.col);
                 return float4( col , 1.);
 
             }

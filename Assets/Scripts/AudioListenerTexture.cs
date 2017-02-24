@@ -16,6 +16,8 @@ public class AudioListenerTexture : MonoBehaviour
     public float[] lowRes;
     public int lowResSize;// = 256;
 
+    public ComputeBuffer _buffer;
+
     void Awake ()
     {
         width = size;
@@ -31,6 +33,8 @@ public class AudioListenerTexture : MonoBehaviour
 
         // create a 'blank screen' image
         blank = new Color[width * height];
+
+        _buffer = new ComputeBuffer(size, 4 * sizeof(float));
 
         for (int i = 0; i < blank.Length; i++) {
             blank [i] = backgroundColor;
@@ -77,5 +81,7 @@ public class AudioListenerTexture : MonoBehaviour
 
         AudioTexture.SetPixels(pixels);
         AudioTexture.Apply ();
+
+        _buffer.SetData(samples );
     }
 }

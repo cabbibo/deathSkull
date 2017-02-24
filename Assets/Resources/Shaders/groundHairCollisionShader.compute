@@ -69,6 +69,9 @@ RWStructuredBuffer<float4x4> transformMatrix;
 RWStructuredBuffer<Vert> vertBuffer;
 RWStructuredBuffer<Human> humanBuffer;
 
+RWStructuredBuffer<float4> audioBuffer;
+int _AudioLength;
+
 #include "Chunks/snoise.cginc"
 #include "Chunks/curlNoise.cginc"
 
@@ -106,7 +109,10 @@ void CSMain (uint3 id : SV_DispatchThreadID) {
   	float3 force = normalize((normalize( tNorm ) + float3(0,4,0))) * g;// * (.4 + _PullVal * .7) ;// * ( 1-vert.uv.x);//float3( 0 , g , 0 );
     //force += float3( 0 , -3, 0) * _PullVal;
 
-    force += 3 * float3(0,0,1) *snoise( vert.pos * 1 + _Time * .3 );
+    float n = snoise( vert.pos * 1 + _Time * .3 );
+    //float audioVal = length(audioBuffer[ int( (( vert.uv.y + _Time)%1) * float( _AudioLength) )]);
+    float audioVal = length(audioBuffer[ int( ((n+_Time) % 1)* float( _AudioLength) )]);
+    force += 3 * float3(0,0,1) *n *(   pow( audioVal , .5 ) * 100);
 
   	if( vert.uv.x == 0 ){ 
   		float3 tPos = mul( transformMatrix[0] , float4( vert.ogPos , 1)).xyz; 

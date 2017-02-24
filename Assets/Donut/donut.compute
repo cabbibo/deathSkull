@@ -18,13 +18,13 @@
 #define _ConnectionSpringStrength        .3
 #define _MaxVel                          3.5
 #define _MaxForce                        3.2
-#define _ForceMultiplier                 0.01
+#define _ForceMultiplier                 0.05
 
-#define _Dampening                       .99
-#define _HandRepelRadius                 0.5
-#define _HandRepelStrength               .2
+#define _Dampening                       .94
+#define _HandRepelRadius                 1.3
+#define _HandRepelStrength               .05
 
-#define _ReturnSpringStrength            10.1
+#define _ReturnSpringStrength            2.1
 
 
 
@@ -100,6 +100,7 @@ int _NumberHumans;
 
 
 
+
 float3 springForce( float3 p1 , float3 p2 , float d ){
 
   float3 dir = p1 - p2;
@@ -140,6 +141,8 @@ RWStructuredBuffer<VertC4> vertBuffer;
 RWStructuredBuffer<Pos> ogBuffer;
 RWStructuredBuffer<float4x4> transBuffer;
 RWStructuredBuffer<Human> humanBuffer;
+RWStructuredBuffer<float4> audioBuffer;
+int _AudioLength;
 
 [numthreads(threadX,threadY,threadZ)]
 void CSMain (uint3 id : SV_DispatchThreadID) {
@@ -194,11 +197,16 @@ void CSMain (uint3 id : SV_DispatchThreadID) {
 
   connectionForce += cs * springForce( vert.pos , l , ls );
   connectionForce += cs * springForce( vert.pos , r , ls );
-  if( length(u) > 0 ){ connectionForce += cs * springForce( vert.pos , u , ls ); }
-  if( length( d ) > 0 ){ connectionForce += cs * springForce( vert.pos , d , ls ); }
+  if( vert.uv.y < 1 - ( 1/  float(_RibbonLength)) ){ connectionForce += cs * springForce( vert.pos , u , ls ); }
+  if( vert.uv.y > 0 ){ connectionForce += cs * springForce( vert.pos , d , ls ); }
 
   force += connectionForce;
   vert.debug = connectionForce;
+
+  //float a = length( audioBuffer[int( (( abs(vert.uv.y - 1) + _Time * .1) % 1 )  * float( _AudioLength))] );
+  
+  //float3( )
+  //force -= vert.nor * pow( a , .3 ) * .3;
 
   //Calculate normal from connections here instead of vert shader
   vert.nor = normalize( cross( (l - r) , (u-d) ));

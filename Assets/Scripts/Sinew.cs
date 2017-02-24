@@ -333,6 +333,9 @@ public class Sinew: MonoBehaviour {
 
 		collisionShader.SetBuffer( _kernelCollision , "transformMatrix" , _transformBuffer );
       	collisionShader.SetBuffer( _kernelCollision , "vertBuffer"     , _vertBuffer );
+
+      	collisionShader.SetBuffer( _kernelCollision , "audioBuffer"  , audioTexture._buffer);
+        collisionShader.SetInt( "_AudioLength" , audioTexture.size );
 	    
 	    collisionShader.SetInt("_StrideX" , strideX);
 	    collisionShader.SetInt("_StrideY" , strideY);

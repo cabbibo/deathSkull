@@ -10,6 +10,7 @@ Shader "Custom/Island" {
     _IntersectionPrecision( "Intersection Precision" , Float ) = 0.0001
     _CubeMap( "Cube Map" , Cube )  = "defaulttexture" {}
     _Fade( "Fade", Int ) = 1
+    _Color( "Color", COLOR) = (1,1,1,1)
 
 
 
@@ -47,6 +48,7 @@ Shader "Custom/Island" {
 
       uniform float3 _Hand1;
       uniform float3 _Hand2;
+      uniform float4 _Color;
       
       uniform samplerCUBE _CubeMap;
       uniform sampler2D _AudioMap;
@@ -111,7 +113,7 @@ Shader "Custom/Island" {
 
         col *= ( aCol.xyz * aCol.xyz ) * 3. + .2;
 
-        col *= float3( .4 , .6 , 3 );
+        col *= _Color.xyz;//float3( .4 , .6 , 3 );
 
     	
             fixed4 color;

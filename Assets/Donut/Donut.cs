@@ -305,6 +305,8 @@ public class Donut : MonoBehaviour {
         computeShader.SetBuffer( _kernel , "vertBuffer"   , _vertBuffer     );
         computeShader.SetBuffer( _kernel , "ogBuffer"     , _ogBuffer       );
         computeShader.SetBuffer( _kernel , "humanBuffer"  , humanBuffer._buffer);
+        computeShader.SetBuffer( _kernel , "audioBuffer"  , audioTexture._buffer);
+        computeShader.SetInt( "_AudioLength" , audioTexture.size );
 
         computeShader.Dispatch(_kernel, strideX , strideY , strideZ );
 

@@ -215,8 +215,8 @@ struct Vert{
               	float3 aCol1 = tex2Dlod( _AudioMap , float4( r1 * .2 + bladeNormed * .2 , 0. ,0. ,0.)).xyz;
               	float3 aCol2 = tex2Dlod( _AudioMap , float4( r2 * .2 + bladeNormed * .2, 0. ,0. ,0.)).xyz;
 
-              	float radius = 1.2 * getRadius( r1 ) * clamp( length( aCol1 ) , 0 , .2) + .03;
-              	float radiusU = 1.2 * getRadius( r2 ) * clamp( length( aCol2 ) , 0 , .2) + .03;
+              	float radius  = 1.2 * getRadius( r1 ) * (clamp( length( aCol1 ) , 0 , .2) + .1);
+              	float radiusU = 1.2 * getRadius( r2 ) * (clamp( length( aCol2 ) , 0 , .2) + .1);
 
               	float3 f1 = radius * sin(angle ) * x1   + radius * cos( angle  ) * z1 + pos1;
               	float3 f2 = radius * sin(angleU) * x1   + radius * cos( angleU ) * z1 + pos1;
