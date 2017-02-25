@@ -6,6 +6,7 @@ public class TeleporterScale : MonoBehaviour {
 
 	public Transform scaleTo;
 	public GameObject objectToScale;
+	public GameObject selectorObject;
 	public Camera camera;
 
 	public TeleportInterface tInterface;
@@ -34,9 +35,9 @@ public class TeleporterScale : MonoBehaviour {
 
 	void OnTriggerEnter( Collider c ){
 
-	   if( c.tag == "internal"){
+	   if( c.gameObject == selectorObject){
 	   	Teleport();
-	   	tInterface.Teleport();
+	   	tInterface.Teleport(transform.gameObject);
 	   }
 	}
 }

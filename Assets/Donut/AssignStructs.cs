@@ -43,9 +43,20 @@ public class AssignStructs : MonoBehaviour {
 
 
 
-  public struct Hand{
+  /*public struct Hand{
     public Vector3 pos;
     public float  triggerVal;
+  };*/
+
+  public struct Hand{
+    public float active;
+    public Vector3 pos;
+    public Vector3 vel;
+    public Vector3 aVel;
+    public float  triggerVal;
+    public float  thumbVal;
+    public float  sideVal;
+    public Vector2 thumbPos;
   };
 
 
