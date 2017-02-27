@@ -21,6 +21,8 @@ public class MoveByController : MonoBehaviour {
   public GameObject secondInsideGO;
   public GameObject movingController;
 
+  public MoveAudio moveAudio;
+
 
   Collider colInside;
 
@@ -168,10 +170,10 @@ public class MoveByController : MonoBehaviour {
 
   void OnTriggerEnter(Collider Other){
 
-  	print("ya");
+  	//print("ya");
     if( Other.tag == "internal" ){ 
 
-    	print("inset");
+    	//print("inset");
   
       inside = true; 
       //print( Other.gameObject );

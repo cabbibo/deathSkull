@@ -7,6 +7,9 @@ public class TeleportInterface : MonoBehaviour {
 	public GameObject[] teleportButtons;
 	public GameObject selectorObject;
 	public GameObject activeButton;
+
+	public AudioClip TeleportClip;
+
 	private bool buttonsShown = true;
 	private bool canTouch = true;
 	// Use this for initialization
@@ -19,13 +22,32 @@ public class TeleportInterface : MonoBehaviour {
 		
 	}
 
+	
+
 	public void Teleport(GameObject t){
+
+		GetComponent<AudioSource>().clip = TeleportClip;
+		GetComponent<AudioSource>().Play();
 		
-		HideButtons();
+		/*HideButtons();
 		
 		t.GetComponent<MeshRenderer>().enabled = true;
-		t.GetComponent<Collider>().enabled = true;
+		t.GetComponent<Collider>().enabled = true;*/
+
+
+
 		activeButton = t;
+
+		selectorObject.transform.position = t.transform.position;
+		selectorObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+
+		selectorObject.GetComponent<MoveByController>().moving = false;
+		selectorObject.GetComponent<MoveByController>().inside = false;
+		selectorObject.GetComponent<MoveByController>().insideGO = null;
+		selectorObject.GetComponent<MoveByController>().secondInsideGO = null;
+		selectorObject.GetComponent<MoveByController>().movingController = null;
+
+	
 		
 		//t.Teleport();
 		canTouch = false;
@@ -69,12 +91,18 @@ public class TeleportInterface : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		/*if( selectorObject.GetComponent<MoveByController>().moving == true ){
+			ShowButtons();
+		}else{
+			HideButtons();
+		}*/
 		
 	}
 
 	void OnTriggerEnter(Collider c){
 		if( c.tag == "internal"){
-	   		ToggleButtons();
+	   		//ToggleButtons();
 	   	}
 
 	}

@@ -9,10 +9,17 @@ public class TeleporterScale : MonoBehaviour {
 	public GameObject selectorObject;
 	public Camera camera;
 
+	public GameObject hand1;
+	public GameObject hand2;
+
 	public TeleportInterface tInterface;
+
+	private MeshRenderer mr;
 
 	// Use this for initialization
 	void Start () {
+
+		
 		
 	}
 	
