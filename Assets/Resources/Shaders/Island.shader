@@ -127,7 +127,7 @@ int _NumberHumans;
             closestHand = mP;
           }
 
-          mP = mul( unity_WorldToObject , float4( humanBuffer[i].hand1.pos  , 1. ) );
+          mP = mul( unity_WorldToObject , float4( humanBuffer[i].hand2.pos  , 1. ) );
           dis = v.position - mP;
           if( length( dis ) < closest){
             closest = length( dis );
@@ -167,22 +167,18 @@ int _NumberHumans;
         //res = float2( -sdBox( pos , float3( 1. , 1. , 1. ) * .53 ) , 0. );
         //res = smoothU( res , float2( sdSphere( pos , .04) , 1. ) , 0.1);
 
-        sphere = float2( sdSphere( pos, 1000  ) , 0. );
+        sphere =float2( opRepSphere(  pos , float3( .0025 , .0025, .0025) , .0012 ) , 1);// float r)float2( sdSphere( pos, .1 ) , 0);
         res = sphere;
+
+        //res = float2( 100000000 , 0 );
        
 
-        float n  =  .13 * noise( pos * 10 + float3( _Time.y , 0 , 0 ) ) * 4 + .6 * noise( pos * 30 + float3( 0, _Time.y , 0 ) ) + .5 * noise( pos * 80+ float3( 0,0,_Time.y ) );
-
-        float2 hand = float2( sdSphere( pos - closestHand ,.01 ),2);
-        float2 resFlat = hardS( res , hand );
-        //resSmooth = smoothU( res , hand , .15);
-        float2 resSub = smoothS( hand , res , 16 );
-        res = hardU( resSub , hand );
+        float n  =  .13 * noise( pos * 3000 + float3( _Time.y , 0 , 0 ) ) * 4;
+        n +=  .6 * noise( pos * 10000 + float3( 0, _Time.y , 0 ) );// + .5 * noise( pos * 800000+ float3( 0,0,_Time.y ) );
 
 
 
-
-        //res.x  += n * .06;// * (1- _LightsOn) + _LightsOn * .06;// + .02 * length( aNoise );
+        res.x  += n * .0006;// * (1- _LightsOn) + _LightsOn * .06;// + .02 * length( aNoise );
 
         //res = smoothU( res , float2( box * .01 , 2 ) , 0.01 );
         //
@@ -240,27 +236,43 @@ int _NumberHumans;
       fixed4 frag(VertexOut v) : COLOR {
 
         float3 ro = v.ro;
-        float3 rd = normalize(ro - v.camPos);
+        float3 rd = normalize(v.ro - v.camPos);
         closestHand = v.closestHand;
 
+        float3 d = closestHand - ro;
+
+
+
         float3 col = float3( 0.0 , 0.0 , 0.0 );
+        float n = noise( ro * 10000 );
 
-        float2 res = calcIntersection(ro, rd);
-
+        ///float3 raytraceCol;
 
         float3 fNorm;
-        float multipler = 0;
-        if( res.y > 0. ){
-          //col = float3( 1.,1.,1.);
-          multipler = 2;
-          fNorm = calcNormal( ro + rd * res.x );
-        
-        }else{
-          multipler = 1;
-          fNorm = v.normal;
-      	
+        float fadeVal = 1;
+        if( length( d ) < .001 - .0004 * n ){
+          
+          float2 res = calcIntersection(ro, rd);
 
+          if( res.y > 0 ){
+            fNorm  = calcNormal( ro + rd * res.x);
+
+            fadeVal = 1 - ( res.x / .005);
+          }else{
+            fNorm = float3( 1,0,0);//v.normal;
+            fadeVal = 0;
+          }
+
+        }else{ 
+          fNorm = v.normal;
         }
+
+
+
+        
+
+
+
 
           float3 fRefl = reflect( -rd , fNorm );
           float3 cubeCol = texCUBE(_CubeMap,fRefl ).rgb;
@@ -272,8 +284,18 @@ int _NumberHumans;
 
           col *= ( aCol.xyz * aCol.xyz ) * 3. + .2;
 
-          col *= _Color.xyz;//float3( .4 , .6 , 3 );
-          col  *= multipler;
+          col *= _Color.xyz;
+          col *= fadeVal;
+
+      
+       
+
+
+       
+        //col /= length( d ) * 10;
+
+          //float3( .4 , .6 , 3 );
+        // col  *= (multipler - 1);
     	
             fixed4 color;
             color = fixed4( col , 1. );

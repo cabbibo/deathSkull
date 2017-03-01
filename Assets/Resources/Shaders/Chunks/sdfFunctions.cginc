@@ -68,14 +68,39 @@ float smax(float a, float b, float k)
     return log(exp(k*a)+exp(k*b))/k;
 }
 
+
+// works for both positive and negative numbers and no problem when a == b
+float smin3(float a, float b, float k)
+{
+    float x = exp(-k * a);
+    float y = exp(-k * b);
+    return (a * x + b * y) / (x + y);
+}
+
+float smax2(float a, float b, float k)
+{
+    return smin3(a, b, -k);
+}
+
+
+float smaxSub( float a, float b, float k )
+{ 
+    k = -k;
+    float h = clamp( 0.5+0.5*(b.x-a.x)/k, 0.0, 1.0 );
+    return lerp( b, a, h ) - k*h*(1.0-h);
+}
+
 float smin(float a, float b, float k)
 {
     return -(log(exp(k*-a)+exp(k*-b))/k);
 }
 
-float2 smoothS( float2 d1, float2 d2, float k)
+float2 smoothS( float2 d1, float2 d2, float k  )
 {
-    return  float2( smax( -d1.x , d2.x , k ) , d2.y );
+   
+    float sm = smax( -d1.x , d2.x , k );
+    float id = (sm - d2.x ) / (-d1.x + d2.x);
+    return  float2( sm , d1.x );
 }
 
 
@@ -105,6 +130,7 @@ float hardS( float d1, float d2 )
 
 
 
+
 float3 rotatedBox( float3 p, float4x4 m )
 {
     float3 q = mul( m , float4( p , 1 )).xyz;
@@ -127,7 +153,7 @@ float opRepSphere( float3 p, float3 c , float r)
 {
     float3 q = modit(p,c)-0.5*c;
     float3 re = (q-p)/c;
-    return sdSphere( q  , r * 1.9 - .1 * length(re) );
+    return sdSphere( q , r );
 }
 
 
