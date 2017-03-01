@@ -23,7 +23,7 @@ public class ScaleHands : MonoBehaviour {
 	    		transform.Find("Head").transform.Find("RamLoRez").transform.Find("default").GetComponent<MeshRenderer>().enabled = false;
 	    		transform.Find("Head").transform.Find("RamLoRez").transform.Find("default.001").GetComponent<MeshRenderer>().enabled = false;
 	    		transform.Find("Head").transform.Find("RamLoRez").transform.Find("default.002").GetComponent<MeshRenderer>().enabled = false;
-	    	AddGhost();
+	    	//AddGhost();
 	    } else {
 	        // Remote
 	        print("non onon");

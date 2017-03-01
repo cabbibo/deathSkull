@@ -122,6 +122,7 @@
         float n  =  .13 * noise( pos * 10 + float3( _Time.y , 0 , 0 ) ) * 4 + .6 * noise( pos * 30 + float3( 0, _Time.y , 0 ) ) + .5 * noise( pos * 80+ float3( 0,0,_Time.y ) );
 
         res = sphere;
+        res.x += n * .01;
         //res = smoothU( res , float2( sdSphere( pos , .04) , 1. ) , 0 );
        // float3 tPos = mul( _Prism , float4( 0,0,0 , 1)).xyz;
 
