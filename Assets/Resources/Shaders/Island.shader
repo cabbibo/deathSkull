@@ -252,8 +252,14 @@ int _NumberHumans;
         float fadeVal = 1;
         if( length( d ) < .001 - .0004 * n ){
           
-          float2 res = calcIntersection(ro, rd);
+          //float2 res = calcIntersection(ro, rd);
+          float n = noise( ro * 10000 );
+          float n1 = noise( ro * 10000 + 100 );
+          float n2 = noise( ro * 10000 + 1000  );
+          fNorm = normalize(v.normal + ( float3(n ,n1 ,n2) - float3( .5, .5 , .5 ) ));
 
+          fadeVal = 2;
+          /*
           if( res.y > 0 ){
             fNorm  = calcNormal( ro + rd * res.x);
 
@@ -261,7 +267,7 @@ int _NumberHumans;
           }else{
             fNorm = float3( 1,0,0);//v.normal;
             fadeVal = 0;
-          }
+          }*/
 
         }else{ 
           fNorm = v.normal;
